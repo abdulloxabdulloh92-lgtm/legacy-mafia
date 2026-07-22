@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy Mafia — Rol taqsimoti jadvali</title>
+<style>
+  :root {
+    --bg: #EEF1F5;
+    --surface: #FFFFFF;
+    --surface-2: #F5F7FA;
+    --ink: #1C222B;
+    --muted: #5C6675;
+    --border: #DCE1E8;
+    --border-strong: #C7CEDA;
+    --accent: #7A2331;
+    --accent-ink: #FFFFFF;
+    --band-mafia: rgba(122, 35, 49, 0.07);
+    --band-mafia-head: rgba(122, 35, 49, 0.14);
+    --band-town: rgba(36, 92, 82, 0.07);
+    --band-town-head: rgba(36, 92, 82, 0.14);
+    --band-extra: rgba(91, 75, 138, 0.07);
+    --band-extra-head: rgba(91, 75, 138, 0.14);
+    --band-fill: rgba(28, 34, 43, 0.045);
+    --zero: #C3C9D2;
+    --shadow: 0 1px 2px rgba(28, 34, 43, 0.06), 0 8px 24px rgba(28, 34, 43, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141B;
+      --surface: #171C24;
+      --surface-2: #1D232D;
+      --ink: #E7EAEE;
+      --muted: #8B94A3;
+      --border: #2A313D;
+      --border-strong: #394253;
+      --accent: #C24C5B;
+      --accent-ink: #10141B;
+      --band-mafia: rgba(194, 76, 91, 0.10);
+      --band-mafia-head: rgba(194, 76, 91, 0.20);
+      --band-town: rgba(76, 156, 141, 0.10);
+      --band-town-head: rgba(76, 156, 141, 0.20);
+      --band-extra: rgba(152, 132, 201, 0.10);
+      --band-extra-head: rgba(152, 132, 201, 0.20);
+      --band-fill: rgba(231, 234, 238, 0.045);
+      --zero: #3A414F;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2 {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .num {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 72px;
+  }
+
+  header.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .lede {
+    max-width: 62ch;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--muted);
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .rule-card .k {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .rule-card .v {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .rule-card .v .num { font-weight: 700; color: var(--accent); }
+
+  .table-shell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    font-size: 13px;
+  }
+  thead tr.group-row th {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 6px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--surface-2);
+  }
+  thead tr.role-row th {
+    position: sticky;
+    top: 27px;
+    z-index: 3;
+    padding: 5px 6px 9px;
+    text-align: center;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  thead th.emoji { font-size: 15px; line-height: 1; display: block; }
+  thead th.rname { display: block; font-size: 9.5px; margin-top: 2px; font-weight: 600; letter-spacing: 0.01em; }
+
+  th.n-col, td.n-col {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--surface-2);
+    text-align: right;
+    padding-right: 12px !important;
+    border-right: 1px solid var(--border-strong);
+    font-weight: 700;
+  }
+  thead th.n-col { z-index: 4; }
+
+  /* .total-head shares thead tr.group-row th's sticky/type styling (higher
+     specificity wins there); this just adds its own differentiators. */
+  .total-head {
+    border-left: 1px solid var(--border-strong);
+    color: var(--muted);
+  }
+
+  th, td {
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  td { text-align: center; color: var(--ink); }
+  td.zero { color: var(--zero); }
+  td.total {
+    font-weight: 700;
+    background: var(--surface-2);
+    border-left: 1px solid var(--border-strong);
+  }
+
+  tbody tr:nth-child(even) td:not(.n-col) { background: var(--band-fill); }
+  tbody tr:hover td { filter: brightness(1.0); }
+  tbody tr:hover td:not(.n-col):not(.total) { background: var(--band-mafia-head); transition: background 0.12s ease; }
+
+  td.g-mafia, th.g-mafia { background: var(--band-mafia); }
+  thead tr.group-row th.g-mafia { background: var(--band-mafia-head); color: var(--accent); }
+  td.g-town { background: var(--band-town); }
+  thead tr.group-row th.g-town { background: var(--band-town-head); color: #245C52; }
+  @media (prefers-color-scheme: dark) {
+    thead tr.group-row th.g-town { color: #7FC7B6; }
+  }
+  td.g-extra { background: var(--band-extra); }
+  thead tr.group-row th.g-extra { background: var(--band-extra-head); color: #5B4B8A; }
+  @media (prefers-color-scheme: dark) {
+    thead tr.group-row th.g-extra { color: #B7A9E6; }
+  }
+
+  tbody tr:nth-child(even) td.g-mafia { background: color-mix(in srgb, var(--band-mafia) 100%, var(--band-fill) 40%); }
+  tbody tr:nth-child(even) td.g-town { background: color-mix(in srgb, var(--band-town) 100%, var(--band-fill) 40%); }
+  tbody tr:nth-child(even) td.g-extra { background: color-mix(in srgb, var(--band-extra) 100%, var(--band-fill) 40%); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-top: 18px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .legend .item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  footer.note {
+    margin-top: 22px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 68ch;
+  }
+  footer.note code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11.5px;
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 28px 14px 56px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="hero">
+    <div class="eyebrow">Legacy Mafia · @LegacyMafiaBot</div>
+    <h1>4 dan 48 gacha — har o'yinchi sonida qaysi rollar chiqadi</h1>
+    <p class="lede">
+      Rol tarkibi <code style="font-family:inherit">buildRoleList</code> funksiyasi bilan aniqlanadi:
+      <strong>mafiya tomon</strong> 24 o'yinchigacha har 4 kishidan 1 taga, 24 dan keyin esa har 5 kishidan 1 taga
+      o'sadi. <strong>Advokat</strong> mafiya tomon 3 kishiga (Don + 2 Mafiya) yetgach qo'shiladi, so'ng 6 ta doimiy
+      tinch-aholi roli, so'ng Qotil va Bo'ri, so'ng — joy qolsa — <strong>Tinch aholi</strong> mafiya tomon sonining
+      kamida yarmicha (yaxlitlab yuqoriga, minimal 1) zaxiralanadi — bu qo'shimcha rollardan OLDIN, ular Tinch
+      aholini butunlay siqib chiqarmasin deb. Shundan keyingina — joy qolsa — standart yoqilgan 9 ta qo'shimcha rol
+      qo'shiladi, va qolgan barcha o'rinlar yana Tinch aholiga beriladi.
+    </p>
+    <div class="rules">
+      <div class="rule-card"><div class="k">Minimal / Maksimal</div><div class="v"><span class="num">4</span> — <span class="num">48</span> o'yinchi</div></div>
+      <div class="rule-card"><div class="k">Mafiya nisbati — 4 dan 24 gacha</div><div class="v">Har <span class="num">4</span> kishidan <span class="num">+1</span> mafiya a'zosi</div></div>
+      <div class="rule-card"><div class="k">Mafiya nisbati — 24 dan keyin</div><div class="v">Har <span class="num">5</span> kishidan <span class="num">+1</span> mafiya a'zosi</div></div>
+      <div class="rule-card"><div class="k">Advokat chegarasi</div><div class="v">Mafiya tomon <span class="num">≥3</span> ga yetganda (9 kishidan)</div></div>
+      <div class="rule-card"><div class="k">Tinch aholi kafolati</div><div class="v">Mafiya tomonning <span class="num">≥yarmi</span> (min <span class="num">1</span>), extralardan ustun</div></div>
+    </div>
+  </header>
+
+  <div class="table-shell">
+    <div class="table-scroll">
+      <table id="roleTable" aria-label="O'yinchilar soniga qarab rol taqsimoti">
+        <thead>
+          <tr class="group-row">
+            <th class="n-col" rowspan="2"></th>
+            <th class="g-mafia" colspan="3">Mafiya tomon</th>
+            <th class="g-town" colspan="6">Tinch aholi — doimiy</th>
+            <th class="g-town" colspan="3">Yakka / kafolatlangan</th>
+            <th class="g-extra" colspan="9">Qo'shimcha rollar (yoqib/o'chirish mumkin)</th>
+            <th class="total-head" rowspan="2">Jami</th>
+          </tr>
+          <tr class="role-row" id="roleHeadRow"></tr>
+        </thead>
+        <tbody id="roleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <footer class="note">
+    Manba: <code>game/state.go → buildRoleList()</code> (2026-07-22 holatiga ko'ra). Har bir qator shu o'yinchi
+    sonida <code>AssignRoles</code> chaqirilganda haqiqatda taqsimlanadigan rollarni aks ettiradi — standart
+    sozlamalar (nisbat = 1/4, barcha qo'shimcha rollar yoniq) asosida hisoblangan. Guruh o'z
+    <code>/settings</code>ida nisbat yoki qaysi qo'shimcha rollar yonishini o'zgartirsa, taqsimot shunga mos ravishda siljiydi.
+  </footer>
+</div>
+
+<script>
+  const ROLES = {
+    don:      { emoji: "🤵🏻", name: "Don",       group: "mafia" },
+    mafiya:   { emoji: "🤵🏼", name: "Mafiya",    group: "mafia" },
+    advokat:  { emoji: "👨‍💼", name: "Advokat",   group: "mafia" },
+    komissar: { emoji: "🕵🏻‍♂", name: "Komissar",  group: "town" },
+    serjant:  { emoji: "👮🏻‍♂", name: "Serjant",   group: "town" },
+    doktor:   { emoji: "👨🏻‍⚕", name: "Doktor",    group: "town" },
+    kezuvchi: { emoji: "💃",   name: "Kezuvchi",  group: "town" },
+    daydi:    { emoji: "🧙‍♂", name: "Daydi",     group: "town" },
+    afsungar: { emoji: "🧞‍♂️", name: "Afsungar",  group: "town" },
+    qotil:    { emoji: "🔪",   name: "Qotil",     group: "town" },
+    bori:     { emoji: "🐺",   name: "Bo'ri",     group: "town" },
+    omadli:    { emoji: "🤞🏼", name: "Omadli",    group: "extra" },
+    gazabkor:  { emoji: "🧨",  name: "G'azabkor", group: "extra" },
+    jurnalist: { emoji: "👩🏼‍💻", name: "Jurnalist", group: "extra" },
+    sehrgar:   { emoji: "🧙",  name: "Sehrgar",   group: "extra" },
+    janob:     { emoji: "🎖",  name: "Janob",     group: "extra" },
+    sotqin:    { emoji: "🤓",  name: "Sotqin",    group: "extra" },
+    aferist:   { emoji: "🤹🏻", name: "Aferist",   group: "extra" },
+    jallod:    { emoji: "🕴️", name: "Jallod",    group: "extra" },
+    suidsid:   { emoji: "🤦🏼", name: "Suidsid",   group: "extra" },
+    tinch:     { emoji: "👨🏼", name: "Tinch aholi", group: "town" },
+  };
+  const COLS = ["don","mafiya","advokat","komissar","serjant","doktor","kezuvchi","daydi","afsungar","qotil","bori","tinch",
+                "omadli","gazabkor","jurnalist","sehrgar","janob","sotqin","aferist","jallod","suidsid"];
+  const CORE_SPECIAL = ["komissar","doktor","kezuvchi","serjant","daydi","afsungar"];
+  const EXTRA_ORDER = ["omadli","gazabkor","jurnalist","sehrgar","janob","sotqin","aferist","jallod","suidsid"];
+  const TIER_BREAK = 24;
+
+  function ceilDiv(a, b) { return a <= 0 ? 0 : Math.ceil(a / b); }
+
+  // Mirrors game/state.go mafiaTeamSize(): 1 mafia-team member per 4 players
+  // up to the 24-player tier break, then 1 per 5 players beyond that.
+  function mafiaTeamSize(n, divisor) {
+    if (n <= TIER_BREAK) return ceilDiv(n, divisor);
+    return ceilDiv(TIER_BREAK, divisor) + ceilDiv(n - TIER_BREAK, divisor + 1);
+  }
+
+  // Mirrors game/state.go buildRoleList() exactly (ratio divisor 4, all extras enabled).
+  function buildRoleList(n) {
+    let mafiaTotal = mafiaTeamSize(n, 4);
+    if (mafiaTotal < 1) mafiaTotal = 1;
+    const roles = ["don"];
+    for (let i = 1; i < mafiaTotal; i++) roles.push("mafiya");
+    if (mafiaTotal >= 3) roles.push("advokat");
+    for (const r of CORE_SPECIAL) { if (roles.length >= n) break; roles.push(r); }
+    for (const r of ["qotil", "bori"]) { if (roles.length >= n) break; roles.push(r); }
+    // Guaranteed Tinch aholi — at least half the mafia team (rounded up,
+    // minimum 1), reserved BEFORE the optional extras.
+    const guaranteedTinch = Math.max(1, Math.floor((mafiaTotal + 1) / 2));
+    for (let i = 0; i < guaranteedTinch; i++) { if (roles.length >= n) break; roles.push("tinch"); }
+    for (const r of EXTRA_ORDER) { if (roles.length >= n) break; roles.push(r); }
+    while (roles.length < n) roles.push("tinch");
+    return roles.slice(0, n);
+  }
+
+  function groupClass(g) { return g === "mafia" ? "g-mafia" : g === "town" ? "g-town" : g === "extra" ? "g-extra" : ""; }
+
+  // --- header ---
+  const headRow = document.getElementById("roleHeadRow");
+  for (const key of COLS) {
+    const r = ROLES[key];
+    const th = document.createElement("th");
+    th.className = groupClass(r.group);
+    th.title = r.name;
+    th.innerHTML = `<span class="emoji">${r.emoji}</span><span class="rname">${r.name}</span>`;
+    headRow.appendChild(th);
+  }
+
+  // --- body ---
+  const body = document.getElementById("roleBody");
+  for (let n = 4; n <= 48; n++) {
+    const roles = buildRoleList(n);
+    const counts = {};
+    for (const r of roles) counts[r] = (counts[r] || 0) + 1;
+
+    const tr = document.createElement("tr");
+    const tdN = document.createElement("td");
+    tdN.className = "n-col num";
+    tdN.textContent = n;
+    tr.appendChild(tdN);
+
+    for (const key of COLS) {
+      const td = document.createElement("td");
+      td.className = "num " + groupClass(ROLES[key].group);
+      const c = counts[key] || 0;
+      if (c === 0) { td.textContent = "–"; td.classList.add("zero"); }
+      else { td.textContent = c; }
+      tr.appendChild(td);
+    }
+    const tdTotal = document.createElement("td");
+    tdTotal.className = "num total";
+    tdTotal.textContent = n;
+    tr.appendChild(tdTotal);
+
+    body.appendChild(tr);
+  }
+
+  // --- legend ---
+  const legend = document.getElementById("legend");
+  const groups = [
+    ["mafia", "Mafiya tomon"],
+    ["town", "Tinch aholi / doimiy"],
+    ["extra", "Qo'shimcha (yoqib/o'chirish mumkin)"],
+  ];
+  for (const [g, label] of groups) {
+    const item = document.createElement("span");
+    item.className = "item";
+    item.innerHTML = `<span class="swatch" style="background:var(--band-${g}-head)"></span>${label}`;
+    legend.appendChild(item);
+  }
+</script>
+
+</body>
+</html>
